@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ඩිජිටල් තොරණ</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Scrollbars නැති කරන්න */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Viewport එකේ උසම පාවිච්චි කරන්න */
+            background-color: #333; /* තොරණ නැතිනම් background color එකක් */
+        }
+
+        /* --- Loading Screen Styles (New) --- */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.9); /* Dark overlay for loading */
+            display: flex; /* Centering content */
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Always on top of everything */
+            transition: opacity 0.5s ease, visibility 0.5s ease; /* Smooth fade out and hide */
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none; /* Make it unclickable when hidden */
+        }
+
+        .loading-screen img {
+            width: 100px; /* Adjust size as needed */
+            height: 100px;
+            object-fit: contain;
+        }
+
+        /* --- Back Button Styles --- */
+        .back-button {
+            position: fixed;
+            top: 20px; /* උඩින්ම තියන්න */
+            left: 20px; /* වම් පැත්තට තියන්න */
+            background-color: rgba(76, 175, 80, 0.7); /* Button color (green, slightly transparent) */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 20; /* අනිත් elements වලට වඩා උඩින් තියන්න */
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        .back-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        /* --- Music Player Styles --- */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            left: 20px; /* වම් පැත්තට වෙන්න හදනවා */
+            background-color: rgba(0, 0, 0, 0.7); /* Background eka tikak transparent karanna */
+            padding: 10px 15px; /* Back button එකට සමාන padding */
+            border-radius: 5px; /* Back button එකට සමාන border-radius */
+            display: flex; /* Flexbox පාවිච්චි කරනවා */
+            align-items: center;
+            color: white;
+            z-index: 10; /* Anik elements walata udin pennanna */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect ekak */
+        }
+
+        .music-player button {
+            background-color: #4CAF50; /* Button color */
+            color: white;
+            padding: 8px 12px; /* Button ඇතුලේ padding */
+            border: none;
+            border-radius: 4px; /* Button වලට පොඩි border-radius එකක් */
+            cursor: pointer;
+            font-size: 15px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        .music-player button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .music-player button:active {
+            transform: translateY(0);
+        }
+
+        /* Default audio controls hide karanna */
+        .music-player audio {
+            display: none;
+        }
+
+
+        .thorana-container {
+            width: 100vw; /* Viewport width එකෙන් 100% ක් ගන්න */
+            height: 100vh; /* Viewport height එකෙන් 100% ක් ගන්න */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* අන්තර්ගතය පිටතට නොයාමට */
+            position: relative; /* අන්තර්ගතය position කරන්න */
+        }
+
+        .thorana-content {
+            /* මෙතන තමයි ඔයාගේ 1280x720 අන්තර්ගතය */
+            width: 1280px;  /* ඔයාගේ තොරණේ original width එක */
+            height: 720px; /* ඔයාගේ තොරණේ original height එක */
+            background-color: transparent; /* වීඩියෝ එක පෙනෙන්න transparent කරන්න */
+            color: #333; /* අවශ්‍ය නම් text colors මෙතන වෙනස් කරන්න */
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Shadow එකක් දාන්න */
+            position: absolute; /* .thorana-container එකට සාපේක්ෂව පිහිටවන්න */
+
+            /* Responsive Scaling */
+            transform-origin: center center; /* මැදින් scale වෙන්න */
+            transform: scale(1); /* Default scale */
+            transition: transform 0.3s ease-out; /* Smooth transition */
+            
+            padding: 0; /* වීඩියෝ එකට padding අවශ්‍ය නැහැ */
+            box-sizing: border-box; /* Padding, border width එකට අයිති කරන්න */
+        }
+        
+        /* තොරණ වීඩියෝ එක සඳහා Styles */
+        .thorana-content video {
+            width: 100%; /* .thorana-content width එකට ගැලපෙන්න */
+            height: 100%; /* .thorana-content height එකට ගැලපෙන්න */
+            object-fit: contain; /* මුළු වීඩියෝ එකම පෙනෙන්න scale වෙනවා */
+            display: block; /* වීඩියෝ එකේ යටින් එන white space එක අයින් කරන්න */
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .back-button {
+                top: 10px;
+                left: 10px;
+                padding: 8px 12px;
+                font-size: 15px;
+            }
+            .music-player {
+                bottom: 10px;
+                left: 10px;
+                padding: 8px 12px;
+            }
+            .music-player button {
+                font-size: 14px;
+                padding: 6px 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .back-button {
+                top: 10px;
+                left: 10px;
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+            .music-player {
+                bottom: 10px;
+                left: 10px;
+                padding: 6px 10px;
+            }
+            .music-player button {
+                font-size: 13px;
+                padding: 5px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <img src="rotate.gif" alt="Loading...">
+    </div>
+
+    <a href="index.html"><button class="back-button">Back</button></a>
+
+    <div class="thorana-container">
+        <div class="thorana-content" id="thoranaContent">
+            <video src="thorana/thorana.mp4" autoplay loop muted playsinline></video>
+        </div>
+    </div>
+
+    <div class="music-player">
+        <audio id="audioPlayer" loop>
+            <source src="thorana/audio.mp3" type="audio/mpeg"> 
+            ඔබේ browser එක audio සඳහා සහය නොදක්වයි.
+        </audio>
+        <button id="playPauseBtn">Play</button>
+    </div>
+
+    <script>
+        function scaleThorana() {
+            const container = document.querySelector('.thorana-container');
+            const content = document.getElementById('thoranaContent');
+
+            const originalWidth = 1280;
+            const originalHeight = 720;
+            const originalAspectRatio = originalWidth / originalHeight;
+
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const viewportAspectRatio = viewportWidth / viewportHeight;
+
+            let scale;
+            if (viewportAspectRatio > originalAspectRatio) {
+                // Viewport is wider than the original content (limited by height)
+                scale = viewportHeight / originalHeight;
+            } else {
+                // Viewport is taller or same aspect ratio (limited by width)
+                scale = viewportWidth / originalWidth;
+            }
+            
+            // විශාල screens වලදී තොරණ original size එකට වඩා විශාල වීම වළක්වන්න
+            if (scale > 1) {
+                scale = 1; // 1280x720 ට වඩා ලොකු කරන්න එපා
+            }
+
+            content.style.transform = `scale(${scale})`;
+        }
+
+        // Page load වෙනකොට සහ window size වෙනස් වෙනකොට scale කරන්න
+        window.addEventListener('load', scaleThorana);
+        window.addEventListener('resize', scaleThorana);
+        
+        // තොරණේ වීඩියෝ එක autoplay කරන්න (browser restrictions තිබිය හැක)
+        const thoranaVideo = document.querySelector('#thoranaContent video');
+        if (thoranaVideo) {
+            thoranaVideo.play().catch(e => console.log("Thorana video autoplay blocked (muted or user interaction needed):", e));
+        }
+
+        // --- Event Listener for Back Button ---
+        const backButton = document.querySelector('.back-button');
+        if (backButton) {
+            backButton.addEventListener('click', () => {
+                window.history.back(); // කලින් page එකට යනවා
+            });
+        }
+
+        // --- Audio Player Logic ---
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+
+        // Initial autoplay attempt for audio on page load
+        audioPlayer.volume = 0.5; 
+        audioPlayer.play().then(() => {
+            playPauseBtn.textContent = 'Pause'; 
+        }).catch(error => {
+            console.warn("Audio autoplay blocked:", error);
+            playPauseBtn.textContent = 'Play'; 
+        });
+
+        playPauseBtn.addEventListener('click', () => {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                playPauseBtn.textContent = 'Pause';
+            } else {
+                audioPlayer.pause();
+                playPauseBtn.textContent = 'Play';
+            }
+        });
+
+        // Set initial button text based on current audio state (if it plays automatically)
+        audioPlayer.addEventListener('play', () => {
+            playPauseBtn.textContent = 'Pause';
+        });
+
+        audioPlayer.addEventListener('pause', () => {
+            playPauseBtn.textContent = 'Play';
+        });
+
+        // --- Loading Screen Logic (New) ---
+        window.addEventListener('load', function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            // setTimeout එකක් භාවිතා කරලා loading screen එක තව ටිකක් වෙලා පෙන්වන්න
+            // මෙහි 1500 යනු මිලි තත්පර 1500ක් (තත්පර 1.5ක්) වන අතර, ඔබට මෙය වෙනස් කළ හැක.
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden'); // Add 'hidden' class to fade out
+            }, 1500); // 1500ms = 1.5 seconds. ඔබට අවශ්‍ය නම් මේ අගය වෙනස් කරන්න.
+        });
+    </script>
+</body>
+</html>

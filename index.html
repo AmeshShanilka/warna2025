@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>වර්ණභා 2025</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Balsamiq Sans', sans-serif; /* පොසොන් vibe එකට ගැලපෙන font එකක් */
+            display: flex;
+            flex-direction: column;
+            /* අන්තර්ගතය (buttons) පිටුවේ පහළටම තල්ලු කිරීමට */
+            justify-content: flex-end; 
+            align-items: center;
+            min-height: 100vh;
+            color: #4CAF50; /* Text color එකක් (ප්‍රධාන වශයෙන් බොත්තම් වල text සඳහා) */
+            
+            /* Background Image Styles for Full Screen on Any Device */
+            background-image: url('home back.jpg'); /* ඔබේ background image එක */
+            background-size: cover; /* සම්පූර්ණ තිරයම cover කරන්න, aspect ratio එක පවත්වා ගනිමින් */
+            background-position: center; /* රූපය මැදට align කරන්න */
+            background-repeat: no-repeat; /* රූපය නැවත නැවත නොපෙන්වන්න */
+            background-attachment: fixed; /* Scroll කරන විට image එක fixed කරන්න */
+            
+            /* බොත්තම් තිරයේ පහළ කෙළවරට ඇලී සිටීම වැලැක්වීමට */
+            padding-bottom: 5vh; 
+        }
+
+        /* --- Loading Screen Styles --- */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.9); /* Dark overlay for loading */
+            display: flex; /* Centering content */
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Always on top of everything */
+            opacity: 1; /* Default visible */
+            visibility: visible; /* Default visible */
+            transition: opacity 0.5s ease, visibility 0.5s ease; /* Smooth fade out and hide */
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none; /* Make it unclickable when hidden */
+        }
+
+        .loading-screen img {
+            width: 100px; /* Adjust size as needed */
+            height: 100px;
+            object-fit: contain;
+        }
+
+        /* --- Main Content Container for Buttons --- */
+        .main-content {
+            text-align: center;
+            padding: 30px; /* Padding තරමක් අඩු කළා */
+             /* සුදු පැහැති, තරමක් විනිවිද පෙනෙන පසුබිමක් */
+            border-radius: 15px; /* තව වටකුරු කළා */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Shadow එක තරමක් අඩු කළා */
+            max-width: 90%; /* විශාල තිර වලදී වැඩිපුර පැතිරීම අඩු කරන්න */
+            box-sizing: border-box; /* Padding, border width එකට අයිති කරන්න */
+            backdrop-filter: blur(6px); /* පසුබිම් රූපයට blur effect එකක් තරමක් අඩු කළා */
+            -webkit-backdrop-filter: blur(6px); /* Safari support */
+            
+            /* මෙය `body` හි `justify-content: flex-end;` සමඟ ක්‍රියාත්මක වේ */
+            margin-top: auto; 
+        }
+        
+        .button-container {
+            display: flex;
+            flex-direction: column; /* බොත්තම් එක යට එක තියන්න */
+            gap: 15px; /* බොත්තම් අතර පරතරය අඩු කළා */
+        }
+
+        .thorana-button {
+            padding: 12px 25px; /* Padding තවදුරටත් අඩු කළා */
+            font-size: 18px; /* Font size තවදුරටත් අඩු කළා */
+            font-weight: bold;
+            background-color: #FFEB3B; /* දීප්තිමත් පොසොන් කහ පැහැය */
+            color: #388E3C; /* තද පොසොන් කොළ පැහැය */
+            border: 3px solid #388E3C; /* පොසොන් කොළ පැහැති border එකක් */
+            border-radius: 10px; /* තව වටකුරු කළා */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Button වලට shadow */
+            min-width: 240px; /* කුඩා තිර වලදී පවා හොඳ පළලක් තබා ගැනීමට */
+        }
+
+        .thorana-button:hover {
+            background-color: #388E3C; /* Hover කරන විට කොළ පැහැයට හැරෙනවා */
+            color: #FFEB3B; /* Text කහ පැහැයට හැරෙනවා */
+            border-color: #FFEB3B; /* Border කහ පැහැයට හැරෙනවා */
+            transform: translateY(-3px); /* Hover කරන විට පොඩ්ඩක් උඩට එනවා */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Shadow එක වැඩි වෙනවා */
+        }
+
+        .thorana-button:active {
+            transform: translateY(0); /* Click කරන විට සාමාන්‍ය තත්ත්වයට එනවා */
+        }
+
+        /* --- Mobile Adjustments --- */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 25px; /* Mobile වලදී padding අඩු කළා */
+                max-width: 95%;
+            }
+            .thorana-button {
+                padding: 10px 20px; /* Mobile වලදී padding තවදුරටත් අඩු කළා */
+                font-size: 16px; /* Mobile වලදී font size තවදුරටත් අඩු කළා */
+                min-width: unset; /* Mobile වලදී min-width අයින් කරන්න */
+            }
+            .button-container {
+                gap: 10px; /* Mobile වලදී gap අඩු කළා */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 15px; /* Tiny screens වලදී padding අඩු කළා */
+                max-width: 98%;
+            }
+            .thorana-button {
+                padding: 8px 15px; /* Tiny screens වලදී padding තවදුරටත් අඩු කළා */
+                font-size: 14px; /* Tiny screens වලදී font size තවදුරටත් අඩු කළා */
+            }
+            .button-container {
+                gap: 8px; /* Tiny screens වලදී gap අඩු කළා */
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <img src="rotate.gif" alt="Loading...">
+    </div>
+
+    <div class="main-content">
+        <div class="button-container">
+            <a href="thorana.html" class="thorana-button">ඩිජිටල් තොරණ බලන්න</a>
+            <a href="bathigee.html" class="thorana-button">බැති ගී ප්‍රසංගය</a> 
+            <a href="ice cream game/icecream.html" class="thorana-button">Ice Cream දන්සල</a> 
+           
+        </div>
+    </div>
+
+    <script>
+        // Loading Screen Logic
+        window.addEventListener('load', function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            // setTimeout එකක් භාවිතා කරලා loading screen එක තව ටිකක් වෙලා පෙන්වන්න
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden'); // Add 'hidden' class to fade out
+            }, 1000); // 1000ms = 1 second. ඔබට අවශ්‍ය නම් මේ අගය වෙනස් කරන්න.
+        });
+    </script>
+</body>
+</html>
