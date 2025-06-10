@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ice Cream දන්සල</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff6b9d;
+            --secondary: #4ecdc4;
+            --accent: #ffe66d;
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --text-dark: #2d3748;
+            --text-light: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--gradient-bg);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            touch-action: manipulation;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1" fill="rgba(255,255,255,0.2)"/><circle cx="40" cy="60" r="3" fill="rgba(255,255,255,0.05)"/><circle cx="70" cy="80" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="80" r="1" fill="rgba(255,255,255,0.15)"/></svg>') repeat;
+            animation: float 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        /* --- Back Button Styles --- */
+        .back-button {
+            position: fixed;
+            top: 20px; /* උඩින්ම තියන්න */
+            left: 20px; /* වම් පැත්තට තියන්න */
+            background-color: rgba(255, 255, 255, 0.2); /* Transparent white */
+            color: var(--text-light);
+            padding: 10px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            z-index: 100; /* අනිත් elements වලට වඩා උඩින් තියන්න */
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        #game-container {
+            width: 1000px;
+            height: 700px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 3.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            text-align: left; /* Changed to left */
+            padding-left: 50px; /* Added padding to the left */
+            animation: glow 2s ease-in-out infinite alternate;
+            position: relative;
+            width: 100%; /* Ensure it takes full width to align text */
+        }
+
+        h1::after {
+            content: '🍦';
+            position: absolute;
+            top: -10px;
+            /* Adjust left position relative to h1 */
+            left: 50px; /* Place it at the beginning of the text, adjust as needed */
+            font-size: 2rem;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px rgba(255, 107, 157, 0.5)); }
+            to { filter: drop-shadow(0 0 20px rgba(255, 107, 157, 0.8)); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #game-area {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        #queue-line {
+            position: absolute;
+            bottom: 80px;
+            left: 150px;
+            right: 50px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--secondary));
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(255, 230, 109, 0.5);
+        }
+
+        .person {
+            width: 70px;
+            height: 70px;
+            position: absolute;
+            bottom: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            z-index: 5;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Person colors - more vibrant and distinct */
+        .person:nth-child(1) { 
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            box-shadow: 0 8px 25px rgba(255, 154, 158, 0.4);
+        }
+        .person:nth-child(2) { 
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            box-shadow: 0 8px 25px rgba(168, 237, 234, 0.4);
+        }
+        .person:nth-child(3) { 
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            box-shadow: 0 8px 25px rgba(252, 182, 159, 0.4);
+        }
+        .person:nth-child(4) { 
+            background: linear-gradient(135deg, #d4fc79, #96e6a1);
+            box-shadow: 0 8px 25px rgba(150, 230, 161, 0.4);
+            color: var(--text-dark);
+        }
+        .person:nth-child(5) { 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .person:nth-child(6) { 
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            box-shadow: 0 8px 25px rgba(255, 154, 158, 0.4);
+        }
+        .person:nth-child(7) { 
+            background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+            box-shadow: 0 8px 25px rgba(161, 196, 253, 0.4);
+        }
+        .person:nth-child(8) { 
+            background: linear-gradient(135deg, #ffc3a0, #ffafbd);
+            box-shadow: 0 8px 25px rgba(255, 175, 189, 0.4);
+        }
+        .person:nth-child(9) { 
+            background: linear-gradient(135deg, #a6c1ee, #fbc2eb);
+            box-shadow: 0 8px 25px rgba(251, 194, 235, 0.4);
+        }
+        .person:nth-child(10) { 
+            background: linear-gradient(135deg, #84fab0, #8fd3f4);
+            box-shadow: 0 8px 25px rgba(143, 211, 244, 0.4);
+        }
+        .person:nth-child(11) { 
+            background: linear-gradient(135deg, #a6c0fe, #f68084);
+            box-shadow: 0 8px 25px rgba(246, 128, 132, 0.4);
+        }
+        .person:nth-child(12) { 
+            background: linear-gradient(135deg, #d299c2, #fef9d7);
+            box-shadow: 0 8px 25px rgba(254, 249, 215, 0.4);
+        }
+        .person:nth-child(13) { 
+            background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+            box-shadow: 0 8px 25px rgba(166, 193, 238, 0.4);
+        }
+        .person:nth-child(14) { 
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            box-shadow: 0 8px 25px rgba(252, 182, 159, 0.4);
+        }
+        .person:nth-child(15) { 
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            box-shadow: 0 8px 25px rgba(255, 154, 158, 0.4);
+        }
+
+        .person:hover {
+            transform: scale(1.1) translateY(-5px);
+        }
+
+        .person.served {
+            opacity: 0;
+            transform: scale(0) translateY(-50px);
+            pointer-events: none;
+        }
+
+        #player {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--secondary), #26d0ce);
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.6);
+            animation: playerGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes playerGlow {
+            from { box-shadow: 0 0 20px rgba(78, 205, 196, 0.6); }
+            to { box-shadow: 0 0 30px rgba(78, 205, 196, 0.9); }
+        }
+
+        #player:active {
+            transform: scale(0.95);
+        }
+
+        #ice-cream-counter {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--accent), #ffdd59);
+            border: 6px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            position: absolute;
+            top: 50px;
+            left: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(255, 230, 109, 0.5);
+            animation: counterPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes counterPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        #ice-cream-counter::before {
+            content: '🍦';
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        #message-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+        }
+
+        #message {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        #reset-button {
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary), #ff8fab);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+            display: none;
+        }
+
+        #reset-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.6);
+        }
+
+        #stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 0; /* Remove padding for full screen on mobile */
+            }
+
+            /* Back button mobile adjustments */
+            .back-button {
+                top: 10px;
+                left: 10px;
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            
+            #game-container {
+                width: 100vw;
+                height: 100vh;
+                padding: 15px;
+                border-radius: 0; /* Remove border-radius for full screen */
+                margin: 0;
+            }
+            
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 15px;
+                padding-left: 20px; /* Adjust padding for smaller screens */
+            }
+            
+            h1::after {
+                left: 20px; /* Adjust emoji position for smaller screens */
+                font-size: 1.5rem;
+            }
+            
+            #game-area {
+                height: 300px;
+                margin-bottom: 15px;
+                /* Add more space to the left for the counter on mobile */
+                padding-left: 100px; 
+            }
+            
+            #queue-line {
+                left: 80px;
+                right: 20px;
+                bottom: 60px;
+            }
+            
+            .person {
+                width: 50px;
+                height: 50px;
+                font-size: 0.9rem;
+                bottom: 35px;
+            }
+            
+            #player {
+                width: 55px;
+                height: 55px;
+                font-size: 0.8rem;
+            }
+            
+            #ice-cream-counter {
+                width: 80px;
+                height: 80px;
+                top: 30px;
+                left: 20px; /* Adjust left position for mobile */
+                font-size: 0.7rem;
+            }
+            
+            #ice-cream-counter::before {
+                font-size: 1.8rem;
+            }
+            
+            #stats {
+                top: 10px;
+                right: 10px;
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+            
+            #message-container {
+                padding: 15px 20px;
+                min-height: 60px;
+                margin-bottom: 15px;
+            }
+            
+            #message {
+                font-size: 1.1rem;
+            }
+            
+            #controls {
+                margin-bottom: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .control-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+                margin: 5px;
+            }
+            
+            #reset-button {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            #game-area {
+                height: 250px;
+                padding-left: 90px; /* Further adjust padding for smaller screens */
+            }
+            
+            .person {
+                width: 45px;
+                height: 45px;
+                font-size: 0.8rem;
+            }
+            
+            #player {
+                width: 50px;
+                height: 50px;
+                font-size: 0.7rem;
+            }
+            
+            #ice-cream-counter {
+                width: 70px;
+                height: 70px;
+                font-size: 0.6rem;
+            }
+            
+            #message {
+                font-size: 1rem;
+            }
+            
+            .control-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="back-button">← Back</button>
+    
+    <div id="game-container">
+        <h1>Ice Cream <br>දන්සල</h1>
+        
+        <div id="stats">
+            <div>People in line: <span id="queue-count">15</span></div>
+            <div>Time: <span id="timer">0</span>s</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+
+        <div id="game-area">
+            <div id="ice-cream-counter">
+                <div>Ice Cream</div>
+                <div>දෙන තැන</div>
+            </div>
+            <div id="queue-line"></div>
+            <div class="person" id="person1">කසුන්</div>
+            <div class="person" id="person2">සජිත්</div>
+            <div class="person" id="person3">මාලනී</div>
+            <div class="person" id="person4">නිපුන්</div>
+            <div class="person" id="person5">භානුක</div>
+            <div class="person" id="person6">සුපුන්</div>
+            <div class="person" id="person7">නිලංකා</div>
+            <div class="person" id="person8">චාමර</div>
+            <div class="person" id="person9">ලහිරු</div>
+            <div class="person" id="person10">රශ්මි</div>
+            <div class="person" id="person11">අමාෂා</div>
+            <div class="person" id="person12">රනිල්</div>
+            <div class="person" id="person13">රොමේශ්</div>
+            <div class="person" id="person14">අකිල</div>
+            <div class="person" id="person15">ගයාන්</div>
+            <div id="player"></div> </div>
+
+        <div id="message-container">
+            <div id="message">Use arrow keys or buttons to move. ඔයාගෙ වාරෙ එනකන් ඉන්න!</div>
+        </div>
+
+        <div id="controls">
+            <div class="control-btn" data-direction="up">↑</div>
+            <div class="control-btn" data-direction="left">←</div>
+            <div class="control-btn" data-direction="down">↓</div>
+            <div class="control-btn" data-direction="right">→</div>
+        </div>
+
+        <button id="reset-button">Play Again</button>
+    </div>
+
+    <script>
+        class IceCreamGame {
+            constructor() {
+                this.gameArea = document.getElementById('game-area');
+                this.player = document.getElementById('player');
+                this.message = document.getElementById('message');
+                this.resetButton = document.getElementById('reset-button');
+                this.queueCount = document.getElementById('queue-count');
+                this.timer = document.getElementById('timer');
+                this.progress = document.getElementById('progress');
+                
+                this.people = Array.from(document.querySelectorAll('.person'));
+                this.controlBtns = document.querySelectorAll('.control-btn');
+                
+                this.gameActive = true;
+                this.playerPos = { x: 0, y: 0 };
+                this.queueSize = this.people.length;
+                this.startTime = Date.now();
+                this.lastMoveTime = Date.now();
+                this.afkTimeout = 8000;
+                this.autoMoveInterval = null;
+                this.gameTimer = null;
+                this.activeDirections = new Set();
+                this.moveInterval = null;
+                this.moveSpeed = 5;
+                this.playerName = ""; // Player name property
+                
+                this.init();
+            }
+
+            init() {
+                this.askForPlayerName(); // Ask for player name at the start
+                this.setupEventListeners();
+                this.positionElements();
+                this.startAutoMovement();
+                this.startGameTimer();
+                this.updateStats();
+            }
+
+            askForPlayerName() {
+                let name = prompt("මචන්, උඹේ නම මොකක්ද? (What's your name, buddy?)");
+                if (!name || name.trim() === "") {
+                    this.playerName = "You"; // Default name if no input
+                } else {
+                    this.playerName = name.trim();
+                }
+                this.player.textContent = this.playerName; // Set player's name
+            }
+
+            setupEventListeners() {
+                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+                document.addEventListener('keyup', (e) => this.handleKeyUp(e));
+                
+                this.controlBtns.forEach(btn => {
+                    const handleStart = (e) => {
+                        e.preventDefault();
+                        const direction = btn.dataset.direction;
+                        this.activeDirections.add(direction);
+                        this.startContinuousMovement();
+                        btn.style.transform = 'scale(0.95)';
+                    };
+                    
+                    const handleEnd = (e) => {
+                        e.preventDefault();
+                        const direction = btn.dataset.direction;
+                        this.activeDirections.delete(direction);
+                        if (this.activeDirections.size === 0) {
+                            this.stopContinuousMovement();
+                        }
+                        btn.style.transform = '';
+                    };
+                    
+                    btn.addEventListener('touchstart', handleStart, { passive: false });
+                    btn.addEventListener('mousedown', handleStart);
+                    btn.addEventListener('touchend', handleEnd, { passive: false });
+                    btn.addEventListener('mouseup', handleEnd);
+                    btn.addEventListener('mouseleave', handleEnd);
+                });
+                
+                window.addEventListener('resize', () => {
+                    setTimeout(() => {
+                        this.positionElements();
+                    }, 100);
+                });
+                
+                this.resetButton.addEventListener('click', () => this.resetGame());
+                document.addEventListener('contextmenu', e => e.preventDefault());
+            }
+
+            handleKeyDown(e) {
+                if (!this.gameActive) return;
+                
+                const key = e.key;
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+                    e.preventDefault();
+                    const direction = key.replace('Arrow', '').toLowerCase();
+                    this.activeDirections.add(direction);
+                    this.startContinuousMovement();
+                }
+            }
+
+            handleKeyUp(e) {
+                const key = e.key;
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+                    e.preventDefault();
+                    const direction = key.replace('Arrow', '').toLowerCase();
+                    this.activeDirections.delete(direction);
+                    if (this.activeDirections.size === 0) {
+                        this.stopContinuousMovement();
+                    }
+                }
+            }
+
+            startContinuousMovement() {
+                if (this.moveInterval) return;
+                
+                this.moveInterval = setInterval(() => {
+                    if (this.activeDirections.size > 0) {
+                        let moveX = 0;
+                        let moveY = 0;
+                        
+                        this.activeDirections.forEach(direction => {
+                            switch(direction) {
+                                case 'up': moveY += this.moveSpeed; break;
+                                case 'down': moveY -= this.moveSpeed; break;
+                                case 'left': moveX -= this.moveSpeed; break;
+                                case 'right': moveX += this.moveSpeed; break;
+                            }
+                        });
+                        
+                        this.movePlayerContinuous(moveX, moveY);
+                    }
+                }, 16);
+            }
+
+            stopContinuousMovement() {
+                if (this.moveInterval) {
+                    clearInterval(this.moveInterval);
+                    this.moveInterval = null;
+                }
+            }
+
+            movePlayerContinuous(moveX, moveY) {
+                if (!this.gameActive) return;
+                
+                const isMobile = window.innerWidth <= 768;
+                const bounds = this.gameArea.getBoundingClientRect();
+                const playerSize = isMobile ? 55 : 80;
+                const bottomOffset = isMobile ? 35 : 50;
+                
+                let newX = this.playerPos.x + moveX;
+                let newY = this.playerPos.y + moveY;
+                
+                newX = Math.max(0, Math.min(bounds.width - playerSize, newX));
+                newY = Math.max(0, Math.min(bounds.height - playerSize - bottomOffset, newY));
+                
+                this.playerPos = { x: newX, y: newY };
+                this.updatePlayerPosition();
+                this.lastMoveTime = Date.now();
+                this.checkGameState();
+            }
+
+            positionElements() {
+                const gameAreaWidth = this.gameArea.offsetWidth;
+                const isMobile = window.innerWidth <= 768;
+                const personWidth = isMobile ? 50 : 70;
+                const spacing = isMobile ? 60 : 90;
+                const initialStartX = isMobile ? 120 : 200;
+                
+                // Make the queue more curved like a real queue
+                const activePeople = this.people.filter(p => !p.classList.contains('served'));
+                activePeople.forEach((person, index) => {
+                    // Add some randomness to the position to make it more natural
+                    const randomOffset = Math.random() * 20 - 10; // -10 to 10
+                    const x = initialStartX + (index * spacing * 0.9); // Slightly closer together
+                    const yOffset = Math.sin(index * 0.3) * 15; // Gentle wave pattern
+                    person.style.left = `${x}px`;
+                    person.style.bottom = `${50 + yOffset + randomOffset}px`;
+                    person.style.display = 'flex';
+                });
+                
+                this.people.forEach(person => {
+                    if (person.classList.contains('served')) {
+                        person.style.display = 'none';
+                    }
+                });
+
+                const lastPersonX = initialStartX + (activePeople.length * spacing * 0.9);
+                const lastPersonYOffset = Math.sin(activePeople.length * 0.3) * 15;
+                this.playerPos = { 
+                    x: lastPersonX, 
+                    y: isMobile ? 35 + lastPersonYOffset : 50 + lastPersonYOffset 
+                };
+                this.updatePlayerPosition();
+            }
+
+            updatePlayerPosition() {
+                this.player.style.left = `${this.playerPos.x}px`;
+                this.player.style.bottom = `${this.playerPos.y}px`;
+            }
+
+            checkGameState() {
+                if (!this.gameActive) return;
+                
+                if (Date.now() - this.lastMoveTime > this.afkTimeout) {
+                    this.gameOver("Time's up! You waited too long without moving.");
+                    return;
+                }
+                
+                const activePeople = this.people.filter(p => !p.classList.contains('served'));
+                for (let person of activePeople) {
+                    if (this.checkCollision(this.player, person)) {
+                        this.gameOver("එයී! පෝලිම් පනින්න එපා!");
+                        return;
+                    }
+                }
+                
+                if (activePeople.length > 0) {
+                    const firstPerson = activePeople[0];
+                    const firstPersonRect = firstPerson.getBoundingClientRect();
+                    const playerRect = this.player.getBoundingClientRect();
+                    
+                    const buffer = (firstPersonRect.width / 4);
+                    if (playerRect.left < firstPersonRect.left - buffer) {
+                        this.gameOver("පෝලිම් පනින්න එපා! තමන්ගෙ වාරෙ එනකන් ඉන්න!");
+                        return;
+                    }
+                }
+                
+                if (activePeople.length === 0) {
+                    const counter = document.getElementById('ice-cream-counter');
+                    if (this.checkCollision(this.player, counter)) {
+                        this.gameWon();
+                    }
+                }
+            }
+
+            checkCollision(el1, el2) {
+                const rect1 = el1.getBoundingClientRect();
+                const rect2 = el2.getBoundingClientRect();
+                
+                return !(rect1.right < rect2.left || 
+                                rect1.left > rect2.right || 
+                                rect1.bottom < rect2.top || 
+                                rect1.top > rect2.bottom);
+            }
+
+            startAutoMovement() {
+                this.autoMoveInterval = setInterval(() => {
+                    if (!this.gameActive) return;
+                    
+                    const activePeople = this.people.filter(p => !p.classList.contains('served'));
+                    if (activePeople.length > 0) {
+                        const firstPerson = activePeople[0];
+                        firstPerson.classList.add('served');
+
+                        firstPerson.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        firstPerson.style.opacity = '0';
+                        firstPerson.style.transform = 'scale(0.5) translateY(-50px)';
+
+                        setTimeout(() => {
+                            firstPerson.style.display = 'none';
+                            this.queueSize = this.people.filter(p => !p.classList.contains('served')).length;
+                            this.positionElements();
+                            this.updateStats();
+                            
+                            if (this.queueSize === 0) {
+                                this.message.textContent = `පෝලිම හිස් බන්! ice cream ගන්න යමු, ${this.playerName}!`;
+                            } else {
+                                this.message.textContent = `${this.queueSize} දෙනෙක් ඉන්නවා  බන් ${this.playerName}. තව ටිකක් ඉන්න!`;
+                            }
+                        }, 500);
+                    }
+                }, 4000);
+            }
+
+            startGameTimer() {
+                this.gameTimer = setInterval(() => {
+                    if (!this.gameActive) return;
+                    
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    this.timer.textContent = elapsed;
+                    
+                    const progress = Math.min(100, (elapsed / 60) * 100); // Progress based on 60 seconds
+                    this.progress.style.width = `${progress}%`;
+                }, 1000);
+            }
+
+            updateStats() {
+                this.queueCount.textContent = this.queueSize;
+            }
+
+            gameOver(reason) {
+                this.gameActive = false;
+                clearInterval(this.autoMoveInterval);
+                clearInterval(this.gameTimer);
+                this.stopContinuousMovement();
+                
+                this.message.textContent = `Game Over, ${this.playerName}! ${reason}`;
+                this.message.style.color = '#ff6b9d';
+                this.resetButton.style.display = 'block';
+                
+                this.player.style.animation = 'shake 0.5s ease-in-out';
+            }
+
+            gameWon() {
+                this.gameActive = false;
+                clearInterval(this.autoMoveInterval);
+                clearInterval(this.gameTimer);
+                this.stopContinuousMovement();
+                
+                this.message.textContent = `🎉 Congratulations, ${this.playerName}! You got your ice cream! 🍦`;
+                this.message.style.color = '#4ecdc4';
+                this.resetButton.style.display = 'block';
+            }
+
+            resetGame() {
+                location.reload(); // Simple reload for reset
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new IceCreamGame();
+        });
+    </script>
+</body>
+</html>
